@@ -54,6 +54,7 @@ const createContainer = async (res) => {
   // }).then((data) => {
   //   console.log('container removed')
   }).catch((err) => {
+    res.json({ success: false, error: err })
     console.log('Error on start: ', err)
   })
 }
