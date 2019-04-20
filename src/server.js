@@ -1,9 +1,8 @@
-const Docker = require('dockerode')
 const express = require('express')
-
+const docker = require('./libs/docker')
+const containersRoutes = require('./routes/containers')
 const port = 6661
 const app = express()
-const docker = new Docker() //defaults to above if env variables are not used
 
 // create a container entity. does not query API
 // const container = docker.getContainer('71501a8ab0f8')
@@ -34,51 +33,9 @@ async function server () {
     })
   }
   
-  const createContainer = async (res) => {
-    const container = docker.createContainer({
-      Image: 'ubuntu',
-      AttachStdin: false,
-      AttachStdout: true,
-      AttachStderr: true,
-      Tty: true,
-      Cmd: ['/bin/bash', '-c', 'tail -f /var/log/dmesg'],
-      OpenStdin: false,
-      StdinOnce: false
-    }).then((container) => {
-      return container.start()
-    }).then((container) => {
-      return container.resize({
-        h: process.stdout.rows,
-        w: process.stdout.columns
-      })
-    }).then((container) => {
-      return container.stop()
-    }).then((container) => {
-      return container.remove()
-    }).then((data) => {
-      console.log('container removed')
-    }).catch((err) => {
-      console.log(err)
-    })
-  }
-  
-  // Start container
-  app.get('/containers/start/:id', (req, res) => {
-    createContainer(res.json)
-  })
-  
-  // Stop containers
-  app.get('/containers/stop', (req, res) => {
-    docker.listContainers((err, containers) => {
-      if (containers) {
-        containers.forEach(async (containerInfo) => {
-          let stopped = []
-          await docker.getContainer(containerInfo.Id).stop(() => stopped.push(containerInfo.Id))
-          res.json(stopped)
-        })
-      }
-    })
-  })
+  // Routes
+  app.use('/containers', containersRoutes)
+
   
   
   
