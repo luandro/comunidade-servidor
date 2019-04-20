@@ -29,34 +29,36 @@ router.get('/start/:id', (req, res) => {
 })
 
 // Create container
+const createContainer = async (res) => {
+  docker.createContainer({
+    Image: 'jwilder/whoami:latest',
+    AttachStdin: false,
+    AttachStdout: true,
+    AttachStderr: true,
+    Tty: true,
+    // Cmd: ['/bin/bash', '-c', 'tail -f /var/log/dmesg'],
+    OpenStdin: false,
+    StdinOnce: false
+  }).then((container) => {
+    res.json({ success: true})
+    return container.start()
+  // }).then((container) => {
+  //   return container.resize({
+  //     h: process.stdout.rows,
+  //     w: process.stdout.columns
+  //   })
+  // }).then((container) => {
+  //   return container.stop()
+  // }).then((container) => {
+  //   return container.remove()
+  // }).then((data) => {
+  //   console.log('container removed')
+  }).catch((err) => {
+    console.log('Error on start: ', err)
+  })
+}
 router.get('/create', (req, res) => {
-  const createContainer = async (res) => {
-    const container = docker.createContainer({
-      Image: 'ubuntu',
-      AttachStdin: false,
-      AttachStdout: true,
-      AttachStderr: true,
-      Tty: true,
-      Cmd: ['/bin/bash', '-c', 'tail -f /var/log/dmesg'],
-      OpenStdin: false,
-      StdinOnce: false
-    }).then((container) => {
-      return container.start()
-    }).then((container) => {
-      return container.resize({
-        h: process.stdout.rows,
-        w: process.stdout.columns
-      })
-    }).then((container) => {
-      return container.stop()
-    }).then((container) => {
-      return container.remove()
-    }).then((data) => {
-      console.log('container removed')
-    }).catch((err) => {
-      console.log(err)
-    })
-  }
+  createContainer(res)
 })
 
 module.exports = router
