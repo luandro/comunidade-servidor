@@ -5,8 +5,16 @@ const docker = require('../libs/docker')
 // List containers
 router.get('/list', (req, res) => {
   docker.listContainers((err, containers) => {
-    if (!containers) console.error('Docker not running!')
-    res.json(containers)
+    if (!containers) {
+      const err = 'Docker not running!'
+      console.error(err)
+      res.json({
+        success: false,
+        error: err
+      })
+    } else {
+      res.json(containers)
+    }
   })
 })
 
